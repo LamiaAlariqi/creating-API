@@ -41,7 +41,7 @@ export const createOrderController = async (req, res) => {
             });
         }
 
-        // تم نقل كود خصم المخزون هنا: يخصم مرة واحدة فور إنشاء الطلب بنجاح
+       
         const updatedStocks = await Promise.all(orderItems.map(item => updatestock(item.product, item.quantity)));
 
         return res.status(200).json({
