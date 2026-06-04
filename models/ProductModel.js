@@ -9,6 +9,10 @@ const productSchema = new mongoose.Schema({
     description: {
         type: String,
         required: [true, "Description is required"],
+    },
+    price: {
+        type: Number,
+        required: [true, "Price is required"],
         max: [999999, "Price must be under 6 digits"],
     },
     category: {

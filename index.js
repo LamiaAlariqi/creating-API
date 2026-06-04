@@ -1,7 +1,9 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import path from 'path';
+import cors from 'cors';
 dotenv.config({ path: path.join(import.meta.dirname, '.env') }); // Load variables specifically from this folder
+
 import connection from './db/conn.js';
 import productRoutes from "./routes/ProductRoute.js";
 import userRoutes from "./routes/UserRoute.js";
@@ -10,7 +12,7 @@ import OrderRouter from './routes/OrderRouter.js';
 
 const app = express();
 const PORT = process.env.PORT || 8000;
-
+app.use(cors({ origin: true, credentials: true }));
 app.use(express.json()); // ضروري جداً لكي يفهم السيرفر بيانات بوست مان
 app.use(cookieParser()); // ضروري جداً لكي يقرأ السيرفر الكوكيز من المتصفح
 app.use("/api/v1", productRoutes); // سيصبح الرابط: http://localhost:8000/api/v1/product/new

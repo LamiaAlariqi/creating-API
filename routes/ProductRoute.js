@@ -1,19 +1,19 @@
 import express from "express";
 import {
-    createProduct,
+    createProducts,
     getAllProducts,
     getSingleProduct,
     updateProduct,
     deleteProduct,
     updateProductController
     
-} from "../controllers/productcontroller.js";
+} from "../controllers/ProductController.js";
 import { isAuthenticatedUser, isAdmin } from "../util/userAuth.js";
 
 const router = express.Router();
 
 // مَسَارات المُنتجات (Product Routes)
-router.post("/product/new", isAuthenticatedUser, isAdmin("admin"), createProduct);
+router.post("/product/new", isAuthenticatedUser, isAdmin("admin"), createProducts);
 router.get("/products", getAllProducts);
 router.get("/product/:id", getSingleProduct);
 router.put("/product/:id", updateProduct);

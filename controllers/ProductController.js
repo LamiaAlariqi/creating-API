@@ -20,43 +20,61 @@ import Product from "../models/ProductModel.js";
 import ApiFeatures from "../util/ApiFeatures.js";
 
 // create product 
-export const createProduct = async (req, res) => {
+export const createProducts = async (req, res) => {
     try {
-        const product = await Product.create(req.body)
+        const { title, description, price, category, stock, images } = req.body;
+        
+        const product = await Product.create({
+            title,
+            description,
+            price,
+            category,
+            stock,
+            images
+        });
+
         if (!product) {
             return res.status(404).json({
                 success: false,
                 message: "Product not created"
-            })
+            });
         }
 
         return res.status(200).json({
             success: true,
             message: "product created successfully",
             product
-        })
+        });
     } catch (error) {
         console.log(error);
         return res.status(500).json({
             success: false,
             error
-        })
+        });
     }
-}
+};
 
 // get all products
 export const getAllProducts = async (req, res) => {
  
     try {
-    const apiFeature = new ApiFeatures(Product.find(), 
-    req.query).search().filter().pagination();
+    const productsPerPage = 10;
+    
+    // للحصول على العدد الإجمالي للمنتجات بعد تطبيق الفلاتر (بدون تقسيم الصفحات)
+    const countFeature = new ApiFeatures(Product.find(), req.query).search().filter();
+    const filteredProducts = await countFeature.query;
+    const filteredProductsCount = filteredProducts.length;
+
+    // جلب المنتجات للصفحة الحالية فقط
+    const apiFeature = new ApiFeatures(Product.find(), req.query).search().filter().pagination();
     const products = await apiFeature.query;
     
-      //  const products = await Product.find();
         return res.status(200).json({
             success: true,
             products,
-            count: products.length
+            count: products.length,
+            filteredProductsCount,
+            productsPerPage
         });
     } catch (error) {
         console.log(error);

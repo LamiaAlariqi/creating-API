@@ -1,5 +1,6 @@
 import { Order } from '../models/orderModel.js';
 import Products from '../models/ProductModel.js';
+import User from '../models/UserModel.js';
 
 export const createOrderController = async (req, res) => {
     try {
@@ -116,8 +117,7 @@ export const getAllOrders = async (req, res) => {
         }
         let total = 0
         orders.forEach(element => {
-            total = total + orders.totalPrice
-
+            total = total + element.totalPrice
         });
         return res.status(200).json({
             success: true,
@@ -207,3 +207,37 @@ return res.status(200).json({
         })
     }
 }
+
+export const combineData = async (req, res) => {
+    try {
+        // جلب جميع البيانات من المجموعات المختلفة
+        const users = await User.find();
+        const products = await Products.find(); 
+        const orders = await Order.find();
+
+        let total = 0;
+
+        // حساب إجمالي السعر من جميع الطلبات
+        orders.forEach(element => {
+            total = total + element.totalPrice;
+        });
+
+        // إرجاع النتيجة بتنسيق JSON
+        return res.status(200).json({
+            success: true,
+            users: users.length,
+            products: products.length,
+            orders: orders.length,
+            total
+        });
+
+    } catch (error) {
+        // التعامل مع الخطأ في حال حدوثه
+        console.log(error);
+        res.status(500).send({
+            success: false,
+            message: "Error in Combined Data API",
+            error: error.message
+        });
+    }
+};

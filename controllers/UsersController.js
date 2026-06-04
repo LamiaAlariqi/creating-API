@@ -118,14 +118,20 @@ export const userProfileController = async (req, res) => {
 export const updateUserProfileController = async (req, res) => {
     try {
         // 1. البحث عن المستخدم أولاً للتأكد من وجوده
-        let user = await User.findById(req.params.id);
+        // let user = await User.findById(req.params.id);
 
-        if (!user) {
-            return res.status(404).json({
-                success: false,
-                message: "User not found"
-            });
-        }
+        // if (!user) {
+        //     return res.status(404).json({
+        //         success: false,
+        //         message: "User not found"
+        //     });
+        // }
+        // 2. تحديث البيانات باستخدام الحقول المرسلة في req.body
+        let user = await User.findByIdAndUpdate(req.user._id, req.body, {
+            new: true,
+            runValidators: true,
+            useFindAndModify: false
+        })
 
         // 2. تحديث البيانات باستخدام الحقول المرسلة في req.body
         user = await User.findByIdAndUpdate(req.params.id, req.body, {
@@ -151,14 +157,16 @@ export const updateUserProfileController = async (req, res) => {
 export const deleteUserProfileController = async (req, res) => {
     try {
         // 1. البحث عن المستخدم أولاً قبل محاولة الحذف
-        let user = await User.findById(req.params.id);
+        // let user = await User.findById(req.params.id);
 
-        if (!user) {
-            return res.status(404).json({
-                success: false,
-                message: "user not found"
-            });
-        }
+        // if (!user) {
+        //     return res.status(404).json({
+        //         success: false,
+        //         message: "user not found"
+        //     });
+        // }
+        //عشان اخذ الاي دي من الكوكيز مش params
+        let user = await User.findByIdAndDelete(req.user._id)
 
         // 2. تنفيذ عملية الحذف من قاعدة البيانات
         user = await User.findByIdAndDelete(req.params.id);
@@ -189,11 +197,9 @@ export const forgotpasswordController = async (req, res) => {
                 message: "User not found"
             });
         }
-        // توليد رمز إعادة تعيين كلمة المرور
         const resetToken = user.getResetPasswordToken();
         await user.save({ validateBeforeSave: false });
-        // إنشاء رابط إعادة تعيين كلمة المرور
-        const resetUrl = `http://localhost:3000/password/reset-password/${resetToken}`;
+        const resetUrl = `http://localhost:5173/password/reset-password/${resetToken}`;
         const message = `Your password reset token is:\n\n${resetUrl}\n\nIf you did not request this, please ignore this email.`;
         await sendEmail({
             email: user.email,
@@ -203,7 +209,7 @@ export const forgotpasswordController = async (req, res) => {
         return res.status(200).json({
             success: true,
             message: `Email sent to ${user.email} successfully`,
-            resetToken //أضفنا هذا مؤقتاً لكي يظهر لك التوكن في بوست مان فتنسخيه بسهولة
+            resetToken
         });
     } catch (error) {
         if (user) {
@@ -226,21 +232,21 @@ export const resetPasswordController = async (req, res) => {
 
         const user = await User.findOne({
             resetPasswordToken,
-            resetPasswordExpire : { $gt : Date.now()}
+            resetPasswordExpire: { $gt: Date.now() }
         });
 
-        if(!user){
+        if (!user) {
             return res.status(400).json({
-                success : false,
-                message : "Invalid token or its been expired"
+                success: false,
+                message: "Invalid token or its been expired"
             })
         }
 
         const { password, confirmPassword } = req.body;
-        if( password !== confirmPassword){
+        if (password !== confirmPassword) {
             return res.status(400).json({
-                success : false,
-                message : "Password doesnt match to each other"
+                success: false,
+                message: "Password doesnt match to each other"
             })
         }
 
@@ -252,7 +258,7 @@ export const resetPasswordController = async (req, res) => {
         sendToken(user, 200, res)
     } catch (error) {
         return res.status(500).json({
-            success : false,
+            success: false,
             error
         })
     }
@@ -301,6 +307,110 @@ export const updatePasswordController = async (req, res) => {
         return res.status(500).json({
             success: false,
             message: "Internal Server Error",
+            error: error.message
+        });
+    }
+};
+
+export const getAllUsersController = async (req, res) => {
+    try {
+        const users = await User.find({});
+        return res.status(200).json({
+            success: true,
+            users
+        });
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: "Error in getting all users",
+            error: error.message
+        });
+    }
+};
+
+export const getUserDetailsController = async (req, res) => {
+    try {
+        // req.user is set by the isAuthenticatedUser middleware
+        const user = await User.findById(req.user.id);
+
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found"
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            user
+        });
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: "Error in getting user details",
+            error: error.message
+        });
+    }
+};
+
+export const getUserRoleController = async (req, res) => {
+    try {
+        // req.user is set by the isAuthenticatedUser middleware
+        const user = await User.findById(req.user.id);
+
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found"
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            role: user.role
+        });
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: "Error in getting user role",
+            error: error.message
+        });
+    }
+};
+
+export const updateUserRoleController = async (req, res) => {
+    try {
+        const { role } = req.body;
+
+        if (!role || (role !== 'admin' && role !== 'user')) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid role specified"
+            });
+        }
+
+        const user = await User.findByIdAndUpdate(
+            req.params.id,
+            { role },
+            { new: true, runValidators: true }
+        );
+
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found"
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "User role updated successfully",
+            user
+        });
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: "Error in updating user role",
             error: error.message
         });
     }

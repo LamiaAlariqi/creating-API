@@ -40,7 +40,7 @@ class ApiFeatures {
 
     pagination() {
         // productsPerPage هو عدد المنتجات التي نريد عرضها في كل صفحة
-        let productsPerPage = 5;
+        let productsPerPage = 10;
         // currentPage هو الصفحة الحالية، وإذا لم يتم تحديده في queryStr، سيتم افتراض أنه الصفحة الأولى
         const currentPage = this.queryStr.page || 1
         // skip هو عدد المنتجات التي يجب تخطيها للوصول إلى الصفحة الحالية

@@ -1,6 +1,6 @@
 import express from 'express';
 const OrderRouter = express.Router();
-import { createOrderController, getSingleOrder ,MyOrderDetails ,getAllOrders, updateOrderStatus, deleteOrder} from '../controllers/OrderController.js';
+import { createOrderController, getSingleOrder, MyOrderDetails, getAllOrders, updateOrderStatus, deleteOrder } from '../controllers/OrderController.js';
 import { isAuthenticatedUser, isAdmin } from '../util/userAuth.js';
 
 OrderRouter.post('/newOrder', isAuthenticatedUser, createOrderController);
