@@ -18,11 +18,13 @@ app.use(cookieParser()); // ضروري جداً لكي يقرأ السيرفر �
 app.use("/api/v1", productRoutes); // سيصبح الرابط: http://localhost:8000/api/v1/product/new
 app.use("/api/v1", userRoutes); // سيصبح الرابط: http://localhost:8000/api/v1/register
 app.use("/api/v1", OrderRouter); // سيصبح الرابط: http://localhost:8000/api/v1/order/new
-const startServer = async () => {
-    await connection();
+// Connect to DB
+connection();
+
+if (!process.env.VERCEL) {
     app.listen(PORT, () => {
         console.log(`Server is running on http://localhost:${PORT}`);
     });
-};
+}
 
-startServer();
+export default app;

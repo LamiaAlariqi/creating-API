@@ -3,7 +3,12 @@ import User from "../models/UserModel.js";
 
 export const isAuthenticatedUser = async (req, res, next) => {
     try {
-        const { token } = req.cookies;
+        let token = req.cookies.token;
+
+        // Support Authorization header for cross-origin requests (e.g. Vercel frontend)
+        if (!token && req.headers.authorization && req.headers.authorization.startsWith("Bearer ")) {
+            token = req.headers.authorization.split(" ")[1];
+        }
 
         if (!token) {
             return res.status(401).json({
